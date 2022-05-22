@@ -76,6 +76,8 @@ def build_model(df_new):
     # reshape input menjadi 3D [samples, timesteps, features]
     train_X = train_X.reshape((train_X.shape[0], 1, train_X.shape[1]))
     test_X = test_X.reshape((test_X.shape[0], 1, test_X.shape[1]))
+
+    # menggunakan model yang telah dibangu sebelumnya
     model = load_model('temp_predict_model.h5')
 
     model.fit(train_X, train_y, epochs=100, batch_size=50,
