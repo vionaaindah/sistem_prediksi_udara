@@ -1,5 +1,4 @@
-# sistem_prediksi_udara
-Air Temperature Prediction using Streamlit Framework
+# Air Temperature Prediction using Streamlit Framework
 
 ### Installation
 
