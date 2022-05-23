@@ -1,4 +1,4 @@
-# Air Temperature Prediction using Streamlit Framework
+# Air Temperature Prediction System using Streamlit Framework
 
 ### Installation
 
