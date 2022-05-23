@@ -1,3 +1,4 @@
+from winreg import KEY_ENUMERATE_SUB_KEYS
 import streamlit as st
 import numpy as np  # linear algebra
 # data processing, CSV file I/O (e.g. pd.read_csv), data manipulation seperti SQL
@@ -64,7 +65,7 @@ def build_model(df_new):
     # Membagi data menjadi data train dan data test
     values = reframed.values
 
-    n_train_time = len(values) - 7
+    n_train_time = len(values) - 1
     n_train_time = round(n_train_time)
     train = values[:n_train_time, :]
     test = values[n_train_time:, :]
@@ -92,40 +93,79 @@ def build_model(df_new):
     inv_yhat = scaler_new.inverse_transform(inv_yhat)
     inv_yhat = inv_yhat[:, 0]
 
-    # invert scaling untuk nilai aktual
-    test_y = test_y.reshape((len(test_y), 1))
-    inv_y = np.concatenate((test_y, test_X[:, 0:]), axis=1)
-    inv_y = scaler_new.inverse_transform(inv_y)
-    inv_y = inv_y[:, 0]
+    hasil = []
+    aktual = []
+
+    for i in range(7):
+        aktual.append(inv_yhat[0])
+        df2 = pd.DataFrame({"Tavg": [inv_yhat[0]]})
+        df_new = df_new.append(df2, ignore_index=True)
+
+        # normalisasi data
+        scaler_new = MinMaxScaler(feature_range=(0, 1))
+        scaled_new = scaler_new.fit_transform(df_new)
+
+        # frame sebagai supervised learning
+        reframed = series_to_supervised(scaled_new, 1, 1)
+
+        # Membagi data menjadi data train dan data test
+        values = reframed.values
+
+        n_train_time = len(values) - 1
+        n_train_time = round(n_train_time)
+        train = values[:n_train_time, :]
+        test = values[n_train_time:, :]
+
+        # Membagi data menjadi input dan outputs
+        train_X, train_y = train[:, :-1], train[:, -1]
+        test_X, test_y = test[:, :-1], test[:, -1]
+
+        # reshape input menjadi 3D [samples, timesteps, features]
+        train_X = train_X.reshape((train_X.shape[0], 1, train_X.shape[1]))
+        test_X = test_X.reshape((test_X.shape[0], 1, test_X.shape[1]))
+
+        model.fit(train_X, train_y, epochs=100, batch_size=50,
+                  validation_data=(test_X, test_y), verbose=2, shuffle=False)
+
+        # membuat prediksi
+        yhat = model.predict(test_X)
+        test_X = test_X.reshape((test_X.shape[0], 1))
+
+        # invert scaling untuk prediksi
+        inv_yhat = np.concatenate((yhat, test_X[:, 0:]), axis=1)
+        inv_yhat = scaler_new.inverse_transform(inv_yhat)
+        inv_yhat = inv_yhat[:, 0]
+
+        hasil.append(inv_yhat[0])
 
     st.subheader('2. Hasil Prediksi')
     st.write('Suhu Udara Hari Pertama (°C):')
-    st.info('%.2f' % inv_yhat[0])
+    st.info('%.2f' % hasil[0])
     st.write('Suhu Udara Hari Kedua (°C):')
-    st.info('%.2f' % inv_yhat[1])
+    st.info('%.2f' % hasil[1])
     st.write('Suhu Udara Hari Ketiga (°C):')
-    st.info('%.2f' % inv_yhat[2])
+    st.info('%.2f' % hasil[2])
     st.write('Suhu Udara Hari Keempat (°C):')
-    st.info('%.2f' % inv_yhat[3])
+    st.info('%.2f' % hasil[3])
     st.write('Suhu Udara Hari Kelima (°C):')
-    st.info('%.2f' % inv_yhat[4])
+    st.info('%.2f' % hasil[4])
     st.write('Suhu Udara Hari Keenam (°C):')
-    st.info('%.2f' % inv_yhat[5])
+    st.info('%.2f' % hasil[5])
     st.write('Suhu Udara Hari Ketujuh (°C):')
-    st.info('%.2f' % inv_yhat[6])
+    st.info('%.2f' % hasil[6])
 
     st.subheader('3. Model Performance')
     st.markdown('**2.1. Mean Squared Error (MSE)**')
     st.write('Nilai MSE dari Hasil Prediksi Sistem ini adalah:')
-    st.info('%.3f' % mean_squared_error(inv_y, inv_yhat))
+    st.info('%.3f' % mean_squared_error(aktual, hasil))
 
     st.markdown('**2.2. Root Mean Squared Error (RMSE)**')
     st.write('Nilai RMSE dari Hasil Prediksi Sistem ini adalah:')
-    st.info('%.3f' % np.sqrt(mean_squared_error(inv_y, inv_yhat)))
+    st.info('%.3f' % np.sqrt(mean_squared_error(aktual, hasil)))
 
     st.markdown('**2.3. Mean Absolute Error (MAE)**')
     st.write('Nilai MAE dari Hasil Prediksi Sistem ini adalah:')
-    st.info('%.3f' % mean_absolute_error(inv_y, inv_yhat))
+    st.info('%.3f' % mean_absolute_error(aktual, hasil))
 
 
 #---------------------------------#
