@@ -95,12 +95,12 @@ def build_model(df_new):
 
     hasil = []
     aktual = []
+    df2 = pd.DataFrame({"Tavg": [inv_yhat[0]]})
+    df_new = df_new.append(df2, ignore_index=True)
+    for i in range(7):
+        aktual.append([inv_yhat[0]])
 
     for i in range(7):
-        aktual.append(inv_yhat[0])
-        df2 = pd.DataFrame({"Tavg": [inv_yhat[0]]})
-        df_new = df_new.append(df2, ignore_index=True)
-
         # normalisasi data
         scaler_new = MinMaxScaler(feature_range=(0, 1))
         scaled_new = scaler_new.fit_transform(df_new)
@@ -137,6 +137,8 @@ def build_model(df_new):
         inv_yhat = inv_yhat[:, 0]
 
         hasil.append(inv_yhat[0])
+        df_new = pd.DataFrame(
+            np.insert(df_new.values, -1, values=[inv_yhat[0]], axis=0))
 
     st.subheader('2. Hasil Prediksi')
     st.write('Suhu Udara Hari Pertama (°C):')
