@@ -137,6 +137,8 @@ def build_model(df_new):
         inv_yhat = inv_yhat[:, 0]
 
         hasil.append(inv_yhat[0])
+
+        # menambah hasil prediksi untuk menjadi data latih
         df_new = pd.DataFrame(
             np.insert(df_new.values, -1, values=[inv_yhat[0]], axis=0))
 
