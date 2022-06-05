@@ -94,11 +94,8 @@ def build_model(df_new):
     inv_yhat = inv_yhat[:, 0]
 
     hasil = []
-    aktual = []
     df2 = pd.DataFrame({"Tavg": [inv_yhat[0]]})
     df_new = df_new.append(df2, ignore_index=True)
-    for i in range(7):
-        aktual.append([inv_yhat[0]])
 
     for i in range(7):
         # normalisasi data
@@ -157,19 +154,6 @@ def build_model(df_new):
     st.info('%.2f' % hasil[5])
     st.write('Suhu Udara Hari Ketujuh (°C):')
     st.info('%.2f' % hasil[6])
-
-    st.subheader('3. Model Performance')
-    st.markdown('**2.1. Mean Squared Error (MSE)**')
-    st.write('Nilai MSE dari Hasil Prediksi Sistem ini adalah:')
-    st.info('%.3f' % mean_squared_error(aktual, hasil))
-
-    st.markdown('**2.2. Root Mean Squared Error (RMSE)**')
-    st.write('Nilai RMSE dari Hasil Prediksi Sistem ini adalah:')
-    st.info('%.3f' % np.sqrt(mean_squared_error(aktual, hasil)))
-
-    st.markdown('**2.3. Mean Absolute Error (MAE)**')
-    st.write('Nilai MAE dari Hasil Prediksi Sistem ini adalah:')
-    st.info('%.3f' % mean_absolute_error(aktual, hasil))
 
 
 #---------------------------------#
